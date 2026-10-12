@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+private/
+marketing/
+archive/
+*.bundle
+docs/media/.tools/
+docs/media/recording/
+docs/media/frames/

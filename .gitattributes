@@ -1,0 +1,4 @@
+publish/** linguist-generated=true
+outputs/** linguist-generated=true
+assets/** linguist-vendored=true
+data/catalog.json linguist-generated=true
