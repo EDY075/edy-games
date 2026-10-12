@@ -80,11 +80,11 @@ O build atualiza `outputs/edy-games-catalogo.html` e `publish/index.html`. [Dese
 edy-games/
 ├── src/          # catálogo e player usados pelo build
 ├── data/         # catálogo atual, capas e metadados embutidos
-├── assets/       # fontes, imagens originais e proveniência
+├── assets/       # fontes embutidas
 ├── scripts/      # build e prévia local
 ├── tests/        # regressões e fixtures específicas
 ├── publish/      # HTML servido pelo Cloudflare
-├── outputs/      # HTML para guardar e pacotes de entrega
+├── outputs/      # HTML para guardar
 └── docs/         # documentação, capa, vídeo e capturas atuais
 ```
 
