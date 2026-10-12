@@ -10,7 +10,7 @@ Um catálogo para encontrar jogos de navegador sem precisar procurar cada versã
 
 ## Demonstração
 
-[![Prévia da navegação real do Edy Games](docs/media/demo.gif)](docs/media/demo.mp4)
+https://github.com/user-attachments/assets/9ac29dee-e9ab-4a91-b0c3-410aaec859ab
 
 A demonstração de **1 minuto e 18 segundos** percorre a aplicação real: início com chuva e nebulosa, catálogo, busca, filtros combinados, franquias, ficha do jogo, favoritos, aparência, arquivos próprios, downloads opcionais e perguntas frequentes. [Abrir o MP4 completo](docs/media/demo.mp4).
 
