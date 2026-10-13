@@ -10,9 +10,13 @@
     "import:wasm": "node scripts/import-wasm-arcade.mjs",
     "covers:wasm": "node scripts/update-wasm-covers.mjs",
     "dev": "node scripts/preview.mjs",
+    "deploy": "wrangler deploy",
     "check:public": "node scripts/check-public-content.mjs"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "wrangler": "4.150.0"
   }
 }

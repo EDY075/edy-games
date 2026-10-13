@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "edy-games",
+  "account_id": "51c3431abd7f5db07a7c1d28c6278d5b",
+  "compatibility_date": "2026-10-12",
+  "workers_dev": true,
+  "keep_vars": true,
+  "assets": {
+    "directory": "./publish"
+  }
+}
