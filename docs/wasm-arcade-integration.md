@@ -1,40 +1,32 @@
 # Coleção WASM Arcade — atualização local de 13/10/2026
 
-Pedido: todos os títulos do catálogo público, com links de execução que dispensem a página do WASM Arcade. O usuário aprovou cadastrar os jogos bloqueados com disponibilidade clara. Push e publicação ficam para uma etapa posterior.
+Pedido vigente: cadastrar todos os jogos, priorizar execução direta, usar a página específica da origem quando não houver versão direta, incluir capas reais e destacar GTA V na hero. Push e publicação ficam para depois.
 
 ## Resultado
 
-- 1.082 registros de origem: 5 PC, 227 arcade e 850 Flash.
-- 55 alternativas no player existente: 54 correspondências únicas de nome com versões Web e GTA III com a build PC já cadastrada (`gn-851`). As fichas deixam explícito que a versão pode diferir.
-- GTA V usa `https://gta.deloskiyt.pl/`, extraído dos metadados públicos e indicado pelo usuário. É um jogador com canvas/carregador; exige WebGPU no desktop e pode conter anúncios. Sem partida validada.
-- 1.026 registros aguardam integração. O botão é **Ver disponibilidade** e abre uma mensagem local. Nenhum desses registros tenta carregar arquivos bloqueados ou redireciona para o WASM Arcade.
-- Total do Edy Games: 1.894 entradas. O filtro de coleção e a opção **Somente com acesso direto** distinguem os estados; sorteio exclui indisponíveis. Os dados originais e IDs de favoritos foram preservados.
-- Títulos sem arte existente usam cartões SVG de identificação, explicitamente descritos na ficha.
+- 1.082 registros: 5 PC, 227 arcade e 850 Flash. Total Edy Games: 1.894.
+- 55 alternativas compatíveis no player Edy Games, com aviso de que a edição pode diferir.
+- GTA V abre https://gta.deloskiyt.pl/; Minecraft abre https://wasmarcade.com/eaglercraft/1.8.8/app.html, somente o jogador. Ambos com HTTP 200; partida completa não validada.
+- 1.025 títulos abrem a página específica do jogo na origem, com âncora do jogador: PC/Flash usam #game-surface, arcade usa #game. Esse redirecionamento foi autorizado pelo usuário após a primeira versão. O filtro **Somente com acesso direto** mostra 57 destinos e exclui essas páginas.
+- Nenhum proxy ou remoção de proteções de incorporação. Tela cheia do navegador na outra origem exige gesto do usuário; a âncora posiciona no jogador, sem prometer tela cheia automática. Não foi identificado parâmetro de URL que inicie fullscreen.
+- Todas as 1.082 entradas da coleção têm capa/arte real. Foram recebidas 1.027 imagens WebP e preservadas 55 imagens existentes. Fontes e assinatura dos arquivos conferidas; relatório wasm-cover-checks.json. Arcade/PC usam artes de capa e Flash usa as imagens do próprio jogo. Nenhum cartão textual permanece.
+- Hero GTA V com a arte de Trevor e botão direto ao jogador.
 
-## Evidência da fonte
+## Publicação e HTML portátil
 
-Metadados: `data/wasm-arcade.json`, com os três bundles públicos observados. O importador lê somente literais; não avalia, executa nem importa JavaScript remoto. Alterações de formato ou contagem interrompem a importação para revisão.
+O build gera publish/index.html com aproximadamente 20,94 MB e 1.027 imagens em publish/covers/. O limite individual de static asset da Cloudflare é 25 MiB: https://developers.cloudflare.com/workers/platform/limits/. Publique a pasta completa publish/. As novas imagens são carregadas sob demanda.
 
-As respostas de `https://wasmarcade.com/vice-city`, `/minecraft`, `/games/vice-city/game.js`, `/games/gta3/game.js`, `/games/shar/launcher.js`, `/flash/swf/canabalt.swf` e `/emulation/roms/mslug.zip` foram amostradas em 13/10/2026. As páginas usam `X-Frame-Options: SAMEORIGIN` e `frame-ancestors 'self'`. Scripts e dados usam `Cross-Origin-Resource-Policy: same-origin`, sem `Access-Control-Allow-Origin`. Apenas conhecer a URL do arquivo não permite executá-lo em outra origem. Nenhum proxy nem remoção dessas proteções foi implementado.
+outputs/edy-games-catalogo.html continua sendo um HTML único, com aproximadamente 61,85 MB e todas as capas embutidas. O botão de baixar da versão publicada reúne as imagens da própria origem antes de gerar o HTML. Os limites de origem, timeout e tamanho são verificados; erro de rede evita salvar uma cópia sem capas. Exportação em teste de integração local reuniu as 1.894 capas, idênticas à fonte. O servidor retorna 404 para arquivos fora do diretório publicado.
 
-## Verificações
+O importador lê literais de metadados sem executar JavaScript remoto e preserva as capas recebidas nas reimportações. Falha ao mudar formato/contagem da fonte. Para novas entradas sem capa, node scripts/update-wasm-covers.mjs recebe as imagens.
 
-- 56 destinos configurados responderam HTTP 200 em HEAD. As 55 builds permitem CORS, inclusive para o contexto opaco do player. Relatório: `wasm-link-checks.json`. Isso comprova acessibilidade do destino, sem garantir todos os assets ou uma partida completa.
-- Testes existentes do player e catálogo, mais `tests/wasm-arcade.test.mjs`: importação segura, correspondência conservadora, todos os 1.082 IDs presentes, nenhum destino de execução no domínio WASM Arcade, preservação de 776 entradas GN, sandbox e sintaxe do HTML gerado.
-- Navegador IAB: filtro da coleção mostrou 56 destinos; busca de GTA V confirmou os três links do cartão em `gta.deloskiyt.pl`; busca Metal Slug mostrou mensagem local sem `srcdoc` nem redirecionamento.
-- Bloxorz alternativo carregou o Ruffle e mostrou o menu de início dentro do player Edy Games, sem erros/warnings observados. Não foi concluída uma partida. Evidência: `screenshots/wasm-bloxorz-player.jpg`.
-- Layout da seleção GTA V: 320×568, 390×844, 768×1024, 1024×600, 1366×768, 1920×1080 e limites 679/681 e 1049/1051; sem rolagem horizontal do documento ou imagens quebradas.
-- Player indisponível: 320×568, 768×1024, 1366×768, 1920×1080; mensagem e retorno acessíveis, frame oculto, sem rolagem horizontal.
-- Lista extensa, seleção vazia, reset e ficha verificados em navegador. Dimensões CSS simuladas; dispositivos físicos, escala real do Windows, teclado virtual e texto ampliado a 200% permanecem pendentes.
+## Validação
 
-## Atualizar os metadados
+- Build e testes player, catalog, wasm-arcade e covers: passaram. Incluem IDs, rotas diretas/alternativas por jogo, preservação GN, exportação portátil, assets WebP e tamanho de publicação.
+- Primeira conferência dos 56 destinos diretos: todos HTTP 200; builds compatíveis com CORS. Relatório wasm-link-checks.json. Minecraft adicional: HTTP 200, HTML EaglercraftX 1.8 WASM-GC. HTTP 200 não comprova todos os assets nem uma partida.
+- Navegador IAB: hero GTA V carregada (896×1200) com link correto; seis capas Metal Slug carregadas e links específicos conferidos. Busca, coleção, filtro de acesso direto, ficha e estado vazio verificados. Página Metal Slug na origem aberta no navegador: controles Play e Fullscreen presentes. Sem erros/warnings observados na página.
+- Nova matriz: 320×568, 390×844, 768×1024, 1024×600, 1366×768, 1920×1080; seis capas carregadas e nenhum overflow horizontal do documento. Desktop e celular da hero também inspecionados. Viewports CSS simulados, sem aparelho físico.
+- Primeira amostra Bloxorz: Ruffle mostrou menu dentro do player Edy Games, sem partida completa. A evidência antiga wasm-bloxorz-player.jpg permanece como registro dessa amostra.
+- Dispositivos físicos, escala do Windows, teclado virtual, texto a 200% e partidas de cada título permanecem sem validação.
 
-```sh
-node scripts/import-wasm-arcade.mjs
-node scripts/build.mjs
-node tests/player.test.mjs
-node tests/catalog.test.mjs
-node tests/wasm-arcade.test.mjs
-```
-
-O importador mantém correspondências conservadoras. Novas origens de execução exigem análise de compatibilidade e confirmação de acesso; não transforme URLs de ROM/SWF em páginas de jogo.
+Evidências atuais: screenshots/gta-v-hero.jpg e screenshots/wasm-real-covers.jpg.

@@ -72,6 +72,13 @@ export function matchCompatibleGame(game, games) {
   return candidates.length === 1 ? candidates[0] : undefined;
 }
 
+export function sourcePlayURL(game) {
+  const url = new URL(game.source);
+  if (url.origin !== 'https://wasmarcade.com' || !/^\/(?:vice-city|gta3|simpsons|minecraft|gta-5|flash-games\/[a-z0-9-]+|retro-games\/[a-z0-9-]+)$/.test(url.pathname)) throw Error('Unsupported source game page');
+  url.hash = game.system === 'pc' || game.system === 'flash' ? 'game-surface' : 'game';
+  return url.href;
+}
+
 async function download(url) {
   const response = await fetch(url, { signal: AbortSignal.timeout(30000), credentials: 'omit' });
   if (!response.ok) throw Error('Metadata unavailable: ' + url);
@@ -119,34 +126,36 @@ export async function importWasmArcade() {
   const systems = { pc: 'PC', flash: 'Flash', neogeo: 'Neo Geo', cps1: 'Capcom CPS1', cps2: 'Capcom CPS2', cps3: 'Capcom CPS3', arcade: 'Arcade' };
   const categories = { action: 'Ação e luta', shooter: 'Tiro', platformer: 'Plataforma', adventure: 'Aventura', arcade: 'Arcade e outros', puzzle: 'Puzzle', logic: 'Puzzle', strategy: 'Estratégia', simulation: 'Simulação e sandbox', sports: 'Esportes', racing: 'Corrida', rpg: 'RPG' };
   const entries = [
-    ...pc.map(item => ({ id: 'wasm-pc-' + item.id, upstreamId: item.id, name: item.name, system: 'pc', source: base + item.href, directURL: item.external?.url, category: item.id === 'minecraft' ? 'Simulação e sandbox' : 'Aventura' })),
+    ...pc.map(item => ({ id: 'wasm-pc-' + item.id, upstreamId: item.id, name: item.name, system: 'pc', source: base + item.href, directURL: item.id === 'minecraft' ? base + '/eaglercraft/1.8.8/app.html' : item.external?.url, category: item.id === 'minecraft' ? 'Simulação e sandbox' : 'Aventura' })),
     ...flash.map(item => ({ id: 'wasm-flash-' + item.id, upstreamId: item.id, name: item.title, system: 'flash', source: base + '/flash-games/' + item.id, assetURL: base + '/flash/swf/' + item.id + '.swf', category: categories[item.cats[0]] || 'Arcade e outros' })),
     ...emu.map(item => ({ id: 'wasm-emu-' + item.id, upstreamId: item.id, name: item.title, system: item.sys, source: base + '/retro-games/' + item.slug, assetURL: base + '/emulation/roms/' + item.id + '.zip', category: 'Arcade e outros' })),
   ];
   if (new Set(entries.map(item => item.id)).size !== 1082) throw Error('Duplicate upstream IDs');
   const catalog = JSON.parse(await fs.readFile('data/catalog.json', 'utf8'));
+  const savedCovers = new Map(catalog.games.filter(item => item.id.startsWith('wasm-') && item.coverKind !== 'title-card').map(item => [item.id, { cover: item.cover, coverKind: item.coverKind, coverSource: item.coverSource }]));
+  for (const item of entries) if (savedCovers.get(item.id)?.coverSource) item.coverSource = savedCovers.get(item.id).coverSource;
   const existing = catalog.games.filter(item => !item.id.startsWith('wasm-'));
   const now = new Date().toISOString();
   const imported = entries.map(item => {
     const compatible = matchCompatibleGame(item, existing);
-    const external = item.directURL === 'https://gta.deloskiyt.pl/';
+    const external = ['https://gta.deloskiyt.pl/', 'https://wasmarcade.com/eaglercraft/1.8.8/app.html'].includes(item.directURL);
     const platform = systems[item.system] || 'Arcade';
     return {
       id: item.id, name: item.name, franchise: compatible?.franchise || (item.id.startsWith('wasm-pc-gta') || item.id === 'wasm-pc-vice-city' ? 'GTA' : item.name), category: item.category, platform,
-      type: compatible ? 'Versão compatível para browser' : external ? 'Port para browser' : 'Aguardando integração',
-      collection: 'WASM Arcade', source: item.source, url: external ? item.directURL : compatible?.url || item.source,
+      type: compatible ? 'Versão compatível para browser' : external ? 'Port para browser' : 'Jogo na página de origem',
+      collection: 'WASM Arcade', source: item.source, url: external ? item.directURL : compatible?.url || sourcePlayURL(item),
       ...(compatible ? { buildURL: compatible.buildURL, compatibleGameID: compatible.id } : {}),
-      availability: compatible || external ? 'available' : 'blocked', mode: compatible || external ? 'direct' : 'unavailable',
+      availability: compatible || external ? 'available' : 'source', mode: compatible || external ? 'direct' : 'external',
       verified: false, gameplayStatus: 'not_tested', checkedAt: now,
-      cover: compatible?.cover || titleCover(item.name, platform), coverKind: compatible ? 'source-art' : 'title-card',
-      requirements: compatible ? 'Esta entrada abre a versão compatível já cadastrada no player Edy Games. A edição pode diferir da hospedada no WASM Arcade.' : external ? 'Abre diretamente o jogador de GTA V. Requer navegador de desktop com WebGPU; carregamento grande. O responsável pode exibir anúncios. Partida não validada.' : 'O fornecedor bloqueia o carregamento deste jogo em outros sites. O acesso direto aguarda uma versão compatível ou liberação do responsável.',
-      evidence: compatible ? 'Correspondência única de nome com uma build Web do catálogo existente; partida não testada.' : external ? 'Destino de execução extraído dos metadados públicos; HTML com canvas e carregador, HTTP 200. Partida não testada.' : 'Metadados públicos conferidos. A fonte usa SAMEORIGIN e frame-ancestors self; arquivos amostrados não permitem CORS.',
+      ...(savedCovers.get(item.id) || { cover: compatible?.cover || titleCover(item.name, platform), coverKind: compatible ? 'source-art' : 'title-card' }),
+      requirements: compatible ? 'Esta entrada abre a versão compatível já cadastrada no player Edy Games. A edição pode diferir da hospedada no WASM Arcade.' : external ? item.upstreamId === 'minecraft' ? 'Abre somente o jogador EaglercraftX 1.8.8 WASM-GC, ocupando a página. Requer navegador recente compatível com WebAssembly GC; carregamento grande. Partida não validada.' : 'Abre diretamente o jogador de GTA V. Requer navegador de desktop com WebGPU; carregamento grande. O responsável pode exibir anúncios. Partida não validada.' : 'Abre a página deste jogo no WASM Arcade, posicionada na área do jogador. Use Play para iniciar e o botão de tela cheia do próprio jogo. O navegador exige uma ação nessa página para entrar em tela cheia.',
+      evidence: compatible ? 'Correspondência única de nome com uma build Web do catálogo existente; partida não testada.' : external ? 'Destino de execução extraído dos metadados públicos; HTML com canvas e carregador, HTTP 200. Partida não testada.' : 'Página específica do jogo identificada no catálogo público. Abre o jogador na origem, que não permite incorporação em outros sites. Partida não testada.',
     };
   });
   catalog.games = [...existing, ...imported].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
   catalog.updated = '13/10/2026';
   catalog.platforms = [...new Set([...catalog.platforms, ...imported.map(item => item.platform)])];
-  const summary = { source: base, checkedAt: now, total: entries.length, compatible: imported.filter(item => item.compatibleGameID).length, external: imported.filter(item => item.url === 'https://gta.deloskiyt.pl/').length, blocked: imported.filter(item => item.availability === 'blocked').length };
+  const summary = { source: base, checkedAt: now, total: entries.length, compatible: imported.filter(item => item.compatibleGameID).length, external: imported.filter(item => item.availability === 'available' && !item.compatibleGameID).length, sourcePages: imported.filter(item => item.availability === 'source').length, blocked: 0 };
   catalog.wasmArcade = summary;
   await fs.writeFile('data/wasm-arcade.json', JSON.stringify({ ...summary, metadataAssets: urls, games: entries }, null, 2) + '\n');
   await fs.writeFile('data/catalog.json', JSON.stringify(catalog));

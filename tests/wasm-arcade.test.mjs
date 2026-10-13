@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import vm from 'node:vm';
-import { parseLiteral, matchCompatibleGame } from '../scripts/import-wasm-arcade.mjs';
+import { parseLiteral, matchCompatibleGame, sourcePlayURL } from '../scripts/import-wasm-arcade.mjs';
 import { directPlayURL } from '../src/player/core.mjs';
 
 assert.deepEqual(parseLiteral('[{id:`game`,year:2e3,cats:[`action`]}]').value, [{ id: 'game', year: 2000, cats: ['action'] }]);
@@ -25,11 +25,22 @@ assert.deepEqual(imported.map(game => game.id).sort(), manifest.games.map(game =
 assert.equal(imported.filter(game => game.availability === 'blocked').length, manifest.blocked);
 for (const game of imported) {
   const destination = new URL(directPlayURL(game, 'https://edy.example/catalog.html'));
-  assert.notEqual(destination.hostname, 'wasmarcade.com', game.id + ' must never launch the upstream catalog');
+  if (game.availability === 'source') {
+    assert.equal(destination.hostname, 'wasmarcade.com');
+    assert.equal(destination.pathname, new URL(game.source).pathname);
+    assert.ok(['#game', '#game-surface'].includes(destination.hash));
+  } else if (game.id === 'wasm-pc-minecraft') assert.equal(destination.href, 'https://wasmarcade.com/eaglercraft/1.8.8/app.html');
+  else assert.notEqual(destination.hostname, 'wasmarcade.com', game.id + ' must open a direct version');
   assert.equal(game.verified, false);
   if (game.compatibleGameID) assert.equal(game.buildURL, catalog.games.find(item => item.id === game.compatibleGameID).buildURL);
 }
+assert.equal(imported.filter(game => game.availability === 'source').length, manifest.sourcePages);
+assert.equal(sourcePlayURL({ source: 'https://wasmarcade.com/vice-city', system: 'pc' }), 'https://wasmarcade.com/vice-city#game-surface');
+assert.equal(sourcePlayURL({ source: 'https://wasmarcade.com/retro-games/metal-slug', system: 'neogeo' }), 'https://wasmarcade.com/retro-games/metal-slug#game');
+assert.throws(() => sourcePlayURL({ source: 'https://evil.test/vice-city', system: 'pc' }));
+assert.throws(() => sourcePlayURL({ source: 'https://wasmarcade.com/', system: 'pc' }));
 assert.equal(imported.find(game => game.id === 'wasm-pc-gta5').url, 'https://gta.deloskiyt.pl/');
+assert.equal(imported.find(game => game.id === 'wasm-pc-minecraft').availability, 'available');
 const built = await fs.readFile('publish/index.html', 'utf8');
 for (const script of built.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)) {
   if (!script[0].startsWith('<script id="catalog-data"')) new vm.Script(script[1]);

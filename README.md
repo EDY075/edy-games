@@ -19,7 +19,7 @@ A demonstração de **1 minuto e 18 segundos** percorre a aplicação real: iní
 | Recurso | Para que serve |
 |---|---|
 | **1.894 entradas com arte ou identificação** | Explorar versões hospedadas, jogos web, adaptações, demos e títulos aguardando integração |
-| **Coleção WASM Arcade completa** | 1.082 títulos: 55 alternativas compatíveis, GTA V com link direto e 1.026 aguardando integração |
+| **Coleção WASM Arcade completa** | 1.082 títulos: 55 alternativas compatíveis, GTA V e Minecraft com jogador direto, e 1.025 páginas específicas |
 | **Busca e filtros combinados** | Encontrar jogos por nome, plataforma, categoria e franquia |
 | **Sobre o jogo** | Consultar versão, créditos, requisitos e fonte de cada entrada |
 | **Favoritos** | Guardar uma seleção no próprio navegador |
@@ -36,7 +36,7 @@ A demonstração de **1 minuto e 18 segundos** percorre a aplicação real: iní
 4. Clique em **Jogar**. Builds compatíveis abrem no player isolado; outros títulos usam o destino externo.
 5. Salve favoritos e ajuste a aparência conforme sua preferência.
 
-Selecione **Coleção → WASM Arcade** para consultar os títulos importados. **Somente com acesso direto** mostra os 56 destinos configurados dessa coleção. GTA V abre diretamente `gta.deloskiyt.pl`; as 55 alternativas usam o player Edy Games e podem diferir da edição no WASM Arcade. **Ver disponibilidade** permanece no Edy Games e explica a pendência, sem redirecionar ao catálogo externo. [Análise e validação da integração](docs/wasm-arcade-integration.md).
+Selecione **Coleção → WASM Arcade** para consultar os títulos importados. **Somente com acesso direto** mostra os 57 destinos diretos configurados dessa coleção. GTA V abre diretamente `gta.deloskiyt.pl`, e Minecraft abre o jogador EaglercraftX; as 55 alternativas usam o player Edy Games e podem diferir da edição no WASM Arcade. Os outros 1.025 botões **Jogar** abrem a página específica na área do player da origem. Tela cheia nessa página exige uma ação do usuário. [Análise e validação da integração](docs/wasm-arcade-integration.md).
 
 A seção principal prioriza carregamento automático pela internet. **ISOs e arquivos** é uma área separada para projetos que exigem dados do jogador. O Play! de PS2 está nessa seção. Não há emulação nativa de PS3 ou Xbox 360 sem arquivos confirmada neste catálogo.
 
@@ -52,7 +52,7 @@ As URLs foram conferidas em lote em **12/10/2026**. Um endereço acessível não
 | **Cloudflare Workers Static Assets** | Publicação do catálogo em HTTPS |
 | **iframe com sandbox** | Isolamento das builds compatíveis do player |
 
-O build reúne as fontes, as capas e os dados em **um HTML único**. O catálogo não exige backend nem chaves de API. Alguns jogos dependem de serviços de terceiros e os jogos com arquivos próprios têm requisitos específicos.
+O build gera **um HTML portátil com as capas embutidas** e uma versão para publicação com as novas capas em arquivos WebP locais. O catálogo não exige backend nem chaves de API. Alguns jogos dependem de serviços de terceiros e os jogos com arquivos próprios têm requisitos específicos.
 
 ## Executar localmente
 
@@ -75,7 +75,7 @@ node tests/catalog.test.mjs
 node scripts/preview.mjs
 ```
 
-O build atualiza `outputs/edy-games-catalogo.html` e `publish/index.html`. [Desenvolvimento e publicação](docs/DEVELOPMENT.md).
+O build atualiza `outputs/edy-games-catalogo.html`, `publish/index.html` e `publish/covers/`. [Desenvolvimento e publicação](docs/DEVELOPMENT.md).
 
 ## Organização do repositório
 
