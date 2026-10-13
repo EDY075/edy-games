@@ -18,7 +18,8 @@ A demonstração de **1 minuto e 18 segundos** percorre a aplicação real: iní
 
 | Recurso | Para que serve |
 |---|---|
-| **812 entradas com capas** | Explorar versões hospedadas, jogos web, adaptações e demos |
+| **1.894 entradas com arte ou identificação** | Explorar versões hospedadas, jogos web, adaptações, demos e títulos aguardando integração |
+| **Coleção WASM Arcade completa** | 1.082 títulos: 55 alternativas compatíveis, GTA V com link direto e 1.026 aguardando integração |
 | **Busca e filtros combinados** | Encontrar jogos por nome, plataforma, categoria e franquia |
 | **Sobre o jogo** | Consultar versão, créditos, requisitos e fonte de cada entrada |
 | **Favoritos** | Guardar uma seleção no próprio navegador |
@@ -34,6 +35,8 @@ A demonstração de **1 minuto e 18 segundos** percorre a aplicação real: iní
 3. Consulte **Sobre o jogo** para entender a versão disponível.
 4. Clique em **Jogar**. Builds compatíveis abrem no player isolado; outros títulos usam o destino externo.
 5. Salve favoritos e ajuste a aparência conforme sua preferência.
+
+Selecione **Coleção → WASM Arcade** para consultar os títulos importados. **Somente com acesso direto** mostra os 56 destinos configurados dessa coleção. GTA V abre diretamente `gta.deloskiyt.pl`; as 55 alternativas usam o player Edy Games e podem diferir da edição no WASM Arcade. **Ver disponibilidade** permanece no Edy Games e explica a pendência, sem redirecionar ao catálogo externo. [Análise e validação da integração](docs/wasm-arcade-integration.md).
 
 A seção principal prioriza carregamento automático pela internet. **ISOs e arquivos** é uma área separada para projetos que exigem dados do jogador. O Play! de PS2 está nessa seção. Não há emulação nativa de PS3 ou Xbox 360 sem arquivos confirmada neste catálogo.
 

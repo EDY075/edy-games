@@ -6,7 +6,8 @@
   "description": "Catálogo de jogos de navegador da Edy Games",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node tests/player.test.mjs && node tests/catalog.test.mjs",
+    "test": "node tests/player.test.mjs && node tests/catalog.test.mjs && node tests/wasm-arcade.test.mjs",
+    "import:wasm": "node scripts/import-wasm-arcade.mjs",
     "dev": "node scripts/preview.mjs",
     "check:public": "node scripts/check-public-content.mjs"
   },

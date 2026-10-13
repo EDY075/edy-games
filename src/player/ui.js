@@ -1,11 +1,11 @@
 function gameLink(game) {
   const link = directPlayURL(game, location.href);
-  return /^gn-\d+$/.test(game.id) && validGameBuild(game.buildURL) ? link : safeURL(link);
+  return link !== game.url ? link : safeURL(link);
 }
 
 function initDirectPlayer() {
   const id = new URLSearchParams(location.search).get('play');
-  const game = games.find(item => item.id === id && validGameBuild(item.buildURL));
+  const game = games.find(item => item.id === id && (validGameBuild(item.buildURL) || item.availability === 'blocked'));
   const root = $('#direct-player');
   const frame = $('#direct-game-frame');
   const status = $('#player-status');
@@ -29,6 +29,27 @@ function initDirectPlayer() {
   $('#player-title').textContent = game.name;
   frame.title = game.name;
   $('#player-source').href = safeURL(game.url);
+  if (game.availability === 'blocked') {
+    status.textContent = 'Aguardando integração';
+    frame.hidden = true;
+    $('#player-retry').hidden = true;
+    $('#player-fullscreen').hidden = true;
+    $('#player-source').hidden = true;
+    root.querySelector('.player-note').hidden = true;
+    const message = document.createElement('div');
+    message.className = 'player-unavailable';
+    const title = document.createElement('h2');
+    title.textContent = 'Este jogo ainda não tem acesso direto disponível';
+    const detail = document.createElement('p');
+    detail.textContent = game.requirements;
+    const back = document.createElement('a');
+    back.className = 'button';
+    back.href = cleanURL.href;
+    back.textContent = 'Escolher outro jogo';
+    message.append(title, detail, back);
+    root.append(message);
+    return;
+  }
   let controller;
   let request = 0;
   async function loadGame() {

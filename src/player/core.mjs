@@ -17,7 +17,10 @@ export function validGameBuild(value) {
 }
 
 export function directPlayURL(game, catalogURL) {
-  if (!/^gn-\d+$/.test(game.id) || !validGameBuild(game.buildURL)) return game.url;
+  const wasm = /^wasm-(?:pc|flash|emu)-[a-z0-9-]+$/.test(game.id);
+  const localBuild = (/^gn-\d+$/.test(game.id) || wasm) && validGameBuild(game.buildURL);
+  const blockedEntry = wasm && game.availability === 'blocked';
+  if (!localBuild && !blockedEntry) return game.url;
   const url = new URL(catalogURL);
   if (!['http:', 'https:', 'file:'].includes(url.protocol)) return game.url;
   url.search = '';
